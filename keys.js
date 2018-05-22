@@ -12,7 +12,6 @@ exports.spotify = {
   secret: process.env.SPOTIFY_SECRET
 };
 
-
-console.log(module.filename);
-console.log(module.id);
-console.log(module.exports);
+exports.omdb = {
+  key: process.env.OMDB_KEY
+}
