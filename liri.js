@@ -4,6 +4,7 @@ const Spotify = require("node-spotify-api");
 const Twitter = require("twitter");
 const omdb = require("omdbapi");
 const request = require("request");
+const fs = require("fs");
 const keys = require('./keys.js');
 
 // Obtain keys from keys.js to keep api keys hidden from github resources
