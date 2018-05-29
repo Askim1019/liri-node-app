@@ -2,24 +2,23 @@
 require("dotenv").config();
 const Spotify = require("node-spotify-api");
 const Twitter = require("twitter");
-const Omdb = require("omdbapi");
+const omdb = require("omdbapi");
+const request = require("request");
+const keys = require('./keys.js');
 
 // Obtain keys from keys.js to keep api keys hidden from github resources
-const keys = require('./keys.js');
 const spotify = new Spotify(keys.spotifykeys);
 const twitter = new Twitter(keys.twitterkeys);
-const omdb = keys.omdb.key;
+const omdbKey = keys.omdb.key;
 
 // get the node.js terminal paramaters with process
 let command = process.argv[2];
 let params = process.argv; 
 let songName = "";
+let movieName = "";
 
 
 console.log(command);
-
-
-
 
 // Declare a function  that shows 20 most recent tweets of a specified user
 function showTweets() {
@@ -75,17 +74,68 @@ function defaultSong() {
 }
 
 
+// Method to search for a movie provided by user input
+function movieStats() {
+    for (let i = 3; i < params.length; i++) {
+        movieName += params[i] + " ";
+    }
 
-//Set the conditional commands for liri depending on user command
-if (command === 'my-tweets') {
-    showTweets();
+    if (movieName ===  "")  {
+        movieName = "Mr. Nobody";
+    }
+
+    console.log(movieName);
+
+    let queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=" + omdbKey;
+
+    request(queryUrl, function(error, response, body) {
+
+        if (!error && response.statusCode === 200) {
+            
+            let movie = JSON.parse(body);
+
+            console.log("\nMovie Title: " + movie.Title);
+            console.log("\nYear Released: " + movie.Year);
+            console.log("\nIMDB Rating: " + movie.imdbRating);
+
+            let rottenTomatoesRating = "";
+
+            for (let i = 0; i < movie.Ratings.length; i++) {
+                if (movie.Ratings[i].Source === 'Rotten Tomatoes') {
+                    rottenTomatoesRating = movie.Ratings[i].Value;
+                }
+            }
+
+            console.log("\nRotten Tomatoes Rating: " + rottenTomatoesRating);
+            console.log("\nCountries of Production: " + movie.Country);
+            console.log("\nLanguage: " + movie.Language);
+            console.log("\nMovie Plot: " + movie.Plot);
+            console.log("\nActors/Actresses: " + movie.Actors);
+        }
+    });
 }
 
 
 
 
+
+
+
+//Set the conditional commands for liri depending on user command
+
+//Tweet method invocation
+if (command === 'my-tweets') {
+    showTweets();
+}
+
+// Spotify method invocation
 if (command === 'spotify-this-song' && params.length > 3) {
     songStats();
 } else if (command === 'spotify-this-song' && params.length <= 3) {
     defaultSong(); 
+}
+
+// Omdb movie search method invocation
+if (command === 'movie-this') {
+    movieStats();
 }
